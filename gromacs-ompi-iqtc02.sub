@@ -1,0 +1,45 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job 
+#$ -N GROMACS-OpenMPI-8
+# (2) Requested resources 
+# Parallel Environment and number of cores
+#$ -pe ompi 8
+# Queue
+#$ -q iqtc02.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o gromacs01-8.out 
+#$ -e gromacs01-8.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu 
+##########################################
+# User environment. 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load gromacs/4.0.5_ompfftw-3.2.1
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+rm gromacs01-8.out
+rm gromacs01-8.err
+cd $TMPDIR
+cp /work/jblasco/d.dppc/* .
+########################################## 
+# Run the job 
+########################################## 
+export OMP_NUM_THREADS=1
+grompp -v &> grompp.out
+mpirun -np $NSLOTS mdrun_mpi -v &> mdrun.out
+########################################## 
+# Copy the results to our home directory
+########################################## 
+mkdir -p /work/jblasco/bench/gromacs-8
+cp -r * /work/jblasco/bench/gromacs-8/

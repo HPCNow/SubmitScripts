@@ -1,0 +1,37 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job 
+#$ -N STRESS-ncores 
+# (2) Requested resources 
+# Parallel Environment and number of cores
+#$ -pe smp ncores
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o $HOME/stress-out/stress-$HOSTNAME.out
+#$ -e $HOME/stress-out/stress-$HOSTNAME.err
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu 
+##########################################
+# User environment. 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load stress/1.0.4
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+cd $TMPDIR
+########################################## 
+# Run the job 
+disk=$(df -hP /scratch | tail -1 | gawk '{DF=$2; if( DF ~ /G/){gsub("G","",DF); print DF/100}}')
+mem=$(cat /proc/meminfo | grep MemFree | gawk '{print $2/1024/20}')
+stress_x86-64 --cpu $NSLOTS -m 20 --vm-bytes $mem -d 100 --hdd-bytes $disk
+########################################## 
+# redirecciono un dmesg per revisar possibles errors de sistema
+dmesg > $HOME/stress-out/dmesg-$HOSTNAME.out

@@ -1,0 +1,43 @@
+#!/bin/bash 
+# Script per enviar càlculs de Gamess
+# amb 8 processadors sobre la mateixa maquina
+#                - Jordi Blasco 12/08/07 -
+##########################################
+# Opcions i parametres de l'SGE
+########################################## 
+# (1) Nom del treball (per identificar) 
+#$ -N GAMESS-prova01
+# (2) Recursos sol.licitats 
+#$ -l h_rt=0:50:0 
+#$ -l mem_free=16.0G 
+#$ -pe smp 8
+# (3) Fitxers de sortida 
+#$ -cwd 
+#$ -o gamess01.out 
+#$ -e gamess01.err 
+# (4) Envia un mail quan acava el treball.
+#$ -m e 
+#$ -M jblasco@fbg.ub.es
+##########################################
+# Entorn d.usuari 
+########################################## 
+# Es carreguen els moduls a utilitzar 
+. /etc/profile
+module load gamess
+########################################## 
+# transferencia de dades 
+########################################## 
+# Es copien les dades al directori on es llenc,aran els calculs. 
+cd $TMPDIR
+export Project=gamess_smp_8
+export Input=$Project 
+cp -pr $HOME/path/amb/els/inputs/ $Input
+########################################## 
+# calcul 
+########################################## 
+# Es crea un directori de sortida pels resultats.
+rungms JOB.inp 00 $NCPUS >& JOB.log
+########################################## 
+# Transferencia dels resultats
+########################################## 
+cp -pr $Input $HOME/path/a/on/guardar/els/outputs/

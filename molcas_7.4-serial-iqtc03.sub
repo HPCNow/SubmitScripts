@@ -1,0 +1,82 @@
+#!/bin/tcsh
+
+#16/12/09
+#NOTA: Molcas 7.2 dona uns resultats diferents a la versió 7.4
+#això es degut a que la nova versió utilitza un level shift de 0.5 respecte
+#al level shift 1 que utilitza la versió 7.2. Si en la versió s'utilitza
+#un level shift de 0.5 els resultats ja son bastant concordants amb la
+#última versió
+
+#-------------------------------------------------------------------
+# Parametres del SGE
+# ------------------------------------------------------------------
+
+#$ -N NOM_SCRIPT 
+#$ -pe mpi 1
+#$ -cwd
+#$ -S /bin/tcsh
+#$ -o molcas.out
+#$ -e molcas.err
+#$ -m e 
+#$ -M yourmail@ub.edu
+#$ -q iqtc03.q
+
+#---------------------------------------------------------------------
+# Carreguem els moduls
+#---------------------------------------------------------------------
+source /opt/modules/init/tcsh
+module load molcas/molcas74_patch045_serial_intel9.1_mkl9.1
+
+#---------------------------------------------------------------------
+#DADES A MODIFICAR PER L'USUARI
+# Preparem l'entorn
+#---------------------------------------------------------------------
+
+setenv CurrDir /home/jingles/tests/molcas/7.4/Albert
+setenv Project Ps
+setenv MOLCASMEM 4000
+setenv MOLCASDISK 12000
+setenv Title Titol_projecte
+setenv TempDir $TMPDIR #$TMP/$Project
+# Nota $TMP variable ja cargada pel propi sistema que conté el path /scratch/$USER
+setenv WorkDir $TempDir/$Project.Work
+setenv MOLCAS_SAVE $WorkDir
+
+#--------------------------------------------------------------------
+# Preparem els directoris     
+#--------------------------------------------------------------------
+mkdir -p $WorkDir
+mkdir -p $TempDir
+
+cp -r $CurrDir/* $WorkDir
+cd $WorkDir
+
+#---------------------------------------------------------------------
+#
+# Start executing molcas job  qsub -q iqtc01.q script
+# 
+#---------------------------------------------------------------------
+
+setenv OMP_NUM_THREADS $NSLOTS
+set Infile=$WorkDir/$Project.input
+set Outfile=$WorkDir/$Project.out
+molcas $Infile >> $Outfile
+
+#---------------------------------------------------------------------
+#
+#  Copiem el resultat
+#
+#---------------------------------------------------------------------
+
+cp $Outfile $CurrDir
+
+#--------------------------------------------------------------------
+#
+#  Netejem el scratch
+#
+#--------------------------------------------------------------------
+
+cd -
+rm -rf $TempDir
+
+exit

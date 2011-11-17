@@ -1,0 +1,45 @@
+#!/bin/bash 
+##########################################
+# Opcions i parametres de l'SGE
+########################################## 
+# (1) Nom del treball (per identificar) 
+#$ -N gaussian-smp-prova01
+# (2) Recursos sol.licitats 
+#$ -l h_rt=0:50:0 
+#$ -l h_vmem=8G
+#$ -pe smp 4
+# (3) Fitxers de sortida 
+#$ -cwd 
+#$ -o gaussian-smp.out 
+#$ -e gaussian-smp.err 
+#$ (4) Envia un mail quan acava el treball.
+#$ -m e 
+#$ -M jblasco@fbg.ub.es 
+##########################################
+# Entorn d.usuari 
+########################################## 
+# Es carreguen els moduls a utilitzar 
+module load gaussian
+########################################## 
+# transferencia de dades 
+########################################## 
+# Es copien les dades al directori on es llenc,aran els calculs. 
+cd $TMPDIR
+export Project=gaussian-smp
+export Input=$Project
+cp -pr $HOME/path/amb/els/input.com $Input
+########################################## 
+# calcul 
+########################################## 
+# executem el gaussian g03
+g03 < ./test001.com > test001.log
+########################################## 
+# Transferencia dels resultats
+########################################## 
+cp -pr $Input $HOME/path/a/on/guardar/els/outputs/
+
+Per enviar un càlcul de Gaussian en paral·lel cal:
+Afegir en el input de gaussian el nombre de processadors a utilitzar %NPROCS=4
+Afegir en el input de gaussian la quantitat de memoria a utilitzar %MEM=8GB
+Afegir el Parallel Environment smp per que paral·lelitzi sobre la mateixa màquina (shared memory)
+Gaussian no acostuma a escalar per sobre dels 8 processadors i depenent del tipus de càlcul, inclús menys, per aquest motiu recomanem utilitzar SMP (amb un sol node) en comptes de Linda (amb varis nodes)

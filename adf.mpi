@@ -1,0 +1,63 @@
+#!/bin/bash
+# Script per enviar calculs de ADF amb MPI
+#$ -o jobfile.out
+#$ -e jobfile.err
+#$ -N adf-test
+
+#$ -S /bin/bash
+#$ -V
+#$ -cwd
+#$ -m e
+#$ -notify
+#$ -M jblasco@fbg.ub.es
+#$ -l h_rt=10:00:00
+#$ -l h_vmem=1G
+#$ -pe mpi 4
+#$ -R y
+
+module load adf
+
+SDIR=$(pwd)
+export P4_RSHCOMMAND=ssh
+
+export SCM_MACHINEFILE=$SDIR/scm.machines
+export SCM_TMPDIR=$TMPDIR
+export SCM_USETMPDIR=yes
+export NSCM=$NSLOTS
+
+rm -f $SCM_MACHINEFILE
+for line in `cat $TMPDIR/machines`; do
+  node=`echo $line | cut -f1 -d ":"`
+  slots=`echo $line | cut -s -f2 -d ":"`
+  ssh $node mkdir -p $SCM_TMPDIR
+  if [[ $slots -le 0 ]]; then
+slots=1
+  fi
+  j=0
+  while [ $j -lt $slots ]; do
+echo $node >> $SCM_MACHINEFILE
+j=$(($j + 1))
+  done
+done
+
+# Run your executable:
+$ADFBIN/adf -n $NSLOTS << EOR
+Title WATER Geometry Optimization with Delocalized Coordinates
+
+Atoms
+O 0.000000 0.000000 0.000000
+H 0.000000-0.689440-0.578509
+H 0.000000 0.689440-0.578509
+End
+ 
+Basis
+Type TZ2P
+Core Small
+End
+
+Geometry
+  Optim Deloc
+End
+
+End Input
+EOR

@@ -1,0 +1,51 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job
+#$ -N test_nwchem_iqtc04 
+# (2) Requested resources 
+# Parallel Environment and number of cores
+#$ -pe omp* 4 
+# Queue
+#$ -q iqtc04.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o iqtc04-4.out 
+#$ -e iqtc04-4.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu
+##########################################
+# User environment. 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load nwchem/5.1.1_ics-11.1.072_ompi-1.4.2
+INPUT=input_m5_2x_Rqm3.nw
+output=$INPUT.log
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+
+cd $TMPDIR 
+cp -r $HOME/bench/NWCHEM/$INPUT .
+########################################## 
+# Run the job 
+########################################## 
+export OMP_NUM_THREADS=1
+
+echo "INICI"
+date
+mpirun -np $NSLOTS nwchem $INPUT > $output
+echo "FI"
+date
+########################################## 
+# Copy the results to our home directory
+########################################## 
+mkdir -p $HOME/bench/NWCHEM/OUT_iqtc04
+cp -r $TMPDIR $HOME/bench/NWCHEM/OUT_iqtc04
+

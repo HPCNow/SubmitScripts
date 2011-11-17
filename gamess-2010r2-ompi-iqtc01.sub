@@ -1,0 +1,40 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job 
+#$ -N GAMESS-prova01
+# (2) Requested resources
+# Parallel Environment and number of cores
+#$ -pe ompi 8
+# Queue
+#$ -q iqtc01.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o gamess01.out 
+#$ -e gamess01.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu
+##########################################
+# User environment. 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load gamess/2010r2_intel_ompi-1.3.3
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+cd $TMPDIR
+cp -r $HOME/bench/GAMESS/XRQTC.Gamess_MCQDPT/input/XRQTC.Gamess_MCQDPT.inp .
+########################################## 
+# Run the job 
+########################################## 
+rungms XRQTC.Gamess_MCQDPT.inp 00 $NSLOTS >& XRQTC.Gamess_MCQDPT.log
+########################################## 
+# Copy the results to our home directory
+########################################## 
+cp -r $TMPDIR $HOME/tests.out

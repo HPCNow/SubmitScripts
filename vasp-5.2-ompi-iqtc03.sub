@@ -1,0 +1,44 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job 
+#$ -N VASP-5.2-OpenMPI
+# (2) Requested resources 
+# Parallel Environment and number of cores
+#$ -pe ompi 16
+# Queue
+#$ -q iqtc03.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o vasp-ompi.out 
+#$ -e vasp-ompi.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M  yourmail@ub.edu
+##########################################
+# User environment. 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load vasp/5.2
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+echo "Got $NSLOTS processors."
+cd $TMPDIR 
+cp -r /home/jblasco/TESTS/vasp5.2/tests/test-hg/* .
+########################################## 
+# Run the job 
+########################################## 
+export OMP_NUM_THREADS=1
+mpirun -np $NSLOTS vasp
+
+########################################## 
+# Copy the results to our home directory
+########################################## 
+mkdir -p $HOME/TESTS/vasp5.2/tests/out
+cp -r * $HOME/TESTS/vasp5.2/tests/out/

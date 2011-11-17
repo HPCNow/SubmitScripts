@@ -1,0 +1,81 @@
+<code>
+#!/bin/bash 
+##########################################
+# Opcions i parametres de l'SGE
+########################################## 
+# (1) Nom del treball (per identificar) 
+#$ -N gaussian-linda-prova01
+# (2) Recursos sol.licitats 
+#$ -l h_rt=0:50:0 
+#$ -l h_vmem=8G
+#$ -pe linda 4
+# (3) Fitxers de sortida 
+#$ -cwd 
+#$ -o gaussian-linda.out 
+#$ -e gaussian-linda.err 
+#$ (4) Envia un mail quan acava el treball.
+#$ -m e 
+#$ -M jblasco@fbg.ub.es 
+##########################################
+# Entorn d.usuari 
+########################################## 
+# Es carreguen els moduls a utilitzar 
+. /etc/profile
+module load gaussian
+########################################## 
+# transferencia de dades 
+########################################## 
+# Es copien les dades al directori on es llenc,aran els calculs. 
+cd $TMPDIR
+export Project=gaussian-linda
+export Input=$Project
+cp -pr $HOME/path/amb/els/input.com $Input
+# Es carreguen algunes variables pel Linda
+export GAUSS_SCRDIR=$TMPDIR
+export NODES=\"`cat $TMPDIR/machines`\"
+export GAUSS_LFLAGS="-v -nodelist ${NODES}"
+########################################## 
+# calcul 
+########################################## 
+# executem el gaussian g03
+g03l g03lindatest.com > g03lindatest.log
+########################################## 
+# Transferencia dels resultats
+########################################## 
+cp -pr $Input $HOME/path/a/on/guardar/els/outputs/
+</code>
+
+Cal incloure 3 paràmetres:
+* '''nproc''' : número de processadors a utilitzar dins de cada node 
+* '''NProcLinda''' : número de nodes a utilitzar
+* '''mem''' : quantitat de memòria necessaria per realitzar el càlcul
+
+El input de Gaussian per enviar-ho amb el PE de linda te la forma:
+<code>
+%nproc=2
+%NProcLinda=4
+%mem=400MB
+%chk=t_cp
+#p b3lyp/cc-pvtz counterpoise=3 opt=z-matrix optcyc=999 
+ 
+t
+ 
+0 1
+O 1
+O 1 oo 2
+O 2 oo 1 60.0 3
+H 1 oh 3 hoo 2 0.0 0 1
+H 2 oh 1 hoo 3 0.0 0 2
+H 3 oh 2 hoo 1 0.0 0 3
+H 1 ho 2 oho 3 d1 0 1
+H 2 ho 3 oho 1 d2 0 2
+H 3 ho 1 oho 2 d2 0 3
+ 
+  oo          2.7873
+  oh          0.9771
+  hoo        78.2005
+  ho          0.9609
+  oho       113.8022
+  d1        112.335
+  d2       -113.7495
+</code>

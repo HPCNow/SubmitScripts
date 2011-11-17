@@ -1,0 +1,51 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job 
+#$ -N XRQTC.Gromacs_9LDT-72
+# (2) Requested resources 
+# Parallel Environment and number of cores
+#$ -pe omp* 12
+# Queue
+#$ -q iqtc04.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o gromacs-XRQTC.Gromacs_9LDT-72.out 
+#$ -e gromacs-XRQTC.Gromacs_9LDT-72.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu
+##########################################
+# User environment. 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load Gromacs/3.3.1_ics-11.1.072_fftw3.2.2_ompi-1.4.2
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+cd $TMPDIR
+mkdir -p gromacs-ompi-XRQTC.Gromacs_9LDT-72
+cd gromacs-ompi-XRQTC.Gromacs_9LDT-72
+cp $HOME/bench/GROMACS/XRQTC.Gromacs_9LDT/* .
+########################################## 
+# Run the job 
+########################################## 
+export OMP_NUM_THREADS=1
+ulimit -s unlimited
+grompp_d -f full_vdw.mdp -c 9LDT-pt-md-3.gro -p 9LDT-bu.top -o 9LDT-bu.tpr
+mpirun -np $NSLOTS mdrun_mpi -v -s 9LDT-bu.tpr -o 9LDT-bu.trr > mdrun.out 
+########################################## 
+# Copy the results to our home directory
+########################################## 
+mkdir -p $HOME/bench/GROMACS/XRQTC.Gromacs_9LDT/OUT/gromacs
+cp -r $TMPDIR/* $HOME/bench/GROMACS/XRQTC.Gromacs_9LDT/OUT/gromacs/ 
+##########################################
+# Temps dels resultats              
+##########################################
+TEMPS=$(cat md.log | grep Time: | awk '{print $3}')
+echo "$NSLOTS	$TEMPS" >> $HOME/bench/GROMACS/XRQTC.Gromacs_9LDT/benchmark-ompi-XRQTC.Gromacs_9LDT.dat

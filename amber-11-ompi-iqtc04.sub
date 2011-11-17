@@ -1,0 +1,71 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job
+#$ -N TEST-ncores
+# (2) Resources requested
+#$ -pe omp* ncores
+# Queue
+#$ -q iqtc04.q
+# (3) Output files 
+#$ -cwd 
+#$ -o amber-TEST-ncores_BINAMBER.out 
+#$ -e amber-TEST-ncores_BINAMBER.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu
+#$ -S /bin/bash
+###########################################
+## User environment. 
+########################################### 
+## Load the modules needed 
+#. /etc/profile.d/modules.sh
+module load amber/11_OpenMPI_1.4.2_intel_11.1.072
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+cd $TMPDIR 
+#mkdir -p /work/jblasco/TEST-ncores-BINAMBER
+#cd /work/jblasco/TEST-ncores-BINAMBER
+cp -r $HOME/bench/AMBER/TEST/input/* .
+########################################## 
+# Run the job 
+########################################## 
+export OMP_NUM_THREADS=1
+ulimit -l unlimited
+
+
+A1=ispfv_trxm1_04_din
+A2=ispfv_trxm1
+A3=ispfv_trxm1_03_din
+A4=rst
+
+mpirun -np $NSLOTS pmemd        \
+                           -i   $SGE_O_WORKDIR/$A1.in     \
+                           -o   $TMPDIR/$A1.out           \
+                           -p   $SGE_O_WORKDIR/$A2.top        \
+                           -c   $SGE_O_WORKDIR/$A3.$A4         \
+                           -ref $SGE_O_WORKDIR/$A3.$A4         \
+                           -r   $TMPDIR/$A1.rst           \
+                           -e   $TMPDIR/$A1.mden          \
+                           -x   $TMPDIR/$A1.mdcrd         \
+                           -v   $TMPDIR/$A1.mdvel         \
+                           -l   $TMPDIR/$A1.logfile       \
+                           -inf $TMPDIR/$A1.inf
+
+########################################## 
+# Copy the results to our home directory
+########################################## 
+mkdir -p $HOME/bench/AMBER/TEST/OUT/amber
+cp -r $TMPDIR $HOME/bench/AMBER/TEST/OUT/amber/
+#cp -r /work/jblasco/TEST-ncores-BINAMBER $HOME/bench/AMBER/TEST/OUT/amber/
+##########################################
+# Temps dels resultats
+##########################################
+TEMPS=$(cat $A1.out | grep "Master Total wall time" | awk '{print $6}')
+echo "$NSLOTS   $TEMPS" >> $HOME/bench2/AMBER/benchmark-Nehalem-DP-TEST-BINAMBER.dat
+#cd
+#rm -fr /work/jblasco/TEST-ncores-BINAMBER
+

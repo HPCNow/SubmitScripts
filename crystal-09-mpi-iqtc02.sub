@@ -1,0 +1,39 @@
+#!/bin/bash
+##########################################
+# SGE options and parameters
+##########################################
+# (1) Name of the job
+#$ -N crystal09-MPI
+# (2) Requested resources
+# Parallel Environment and number of cores
+#$ -pe mpi 16
+# Queue
+#$ -q iqtc02.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files
+#$ -cwd
+#$ -o crystal09-mpi.out
+#$ -e crystal09-mpi.err
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e
+##$ -M  yourmail@ub.edu
+##########################################
+# User environment.
+##########################################
+# Load the modules needed
+. /etc/profile.d/modules.sh
+module load crystal/09
+##########################################
+# Run the job
+#########################################
+runmpi.iqtc INPUT $NSLOTS
+
+##########################################
+# Copy the results to our home directory
+##########################################
+mkdir -p $HOME/TESTS/crystal09/tests/out
+cp -r $TMPDIR/* $HOME/TESTS/crystal09/tests/out/
+
+
+

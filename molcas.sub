@@ -1,0 +1,46 @@
+#!/bin/bash 
+# Script per enviar càlculs de Molcas
+# amb 4 processadors sobre la mateixa maquina
+#                - Jordi Blasco 12/08/07 -
+##########################################
+# Opcions i parametres de l'SGE
+########################################## 
+# (1) Nom del treball (per identificar) 
+#$ -N Molcas-prova01
+# (2) Recursos sol.licitats 
+#$ -l h_rt=0:50:0 
+#$ -l mem_free=4.0G 
+#$ -pe smp 4
+# (3) Fitxers de sortida 
+#$ -cwd 
+#$ -o molcas01.out 
+#$ -e molcas01.err 
+# (4) Envia un mail quan acava el treball.
+#$ -m e 
+#$ -M jblasco@fbg.ub.es 
+##########################################
+# Entorn d.usuari 
+########################################## 
+# Es carreguen els moduls a utilitzar 
+module load molcas
+########################################## 
+# transferencia de dades 
+########################################## 
+# Es copien les dades al directori on es llenc,aran els calculs. 
+cd $TMPDIR
+export Project=Jobname
+export Input="$Project".input
+export Output="$Project".out 
+cp -pr $HOME/path/amb/el/input/fitxer.input $Input
+########################################## 
+# calcul 
+########################################## 
+# Es crea un directori de sortida pels resultats.
+export OMP_NUM_THREADS=$NSLOTS
+export CPUS=4
+molcas "$Input" >>"$Output"
+
+########################################## 
+# Transferencia dels resultats
+########################################## 
+cp -pr $Output $HOME/path/a/on/guardar/output/

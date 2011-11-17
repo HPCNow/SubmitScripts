@@ -1,0 +1,91 @@
+#!/bin/sh
+#$ -pe ompi 4
+#$ -cwd
+#$ -V
+#$ -o Si8O13.log
+#$ -S /bin/bash
+#$ -q iqtc01.q
+# 
+source /opt/modules/init/bash
+module load gamess-uk/7.0_intel10.1_ompi1.3.3
+jobname=Si8O13
+root=Si8O13
+executable=/aplic/gamess-uk_ompi_intel/bin/gamess-uk
+jobmode=openmpi
+flist="-k ftn058=Si8O13.pun -k ed3"
+nprocs=4
+nnodes=4
+jobtime=120
+scratchtopdir=.
+libdir=/aplic/gamess-uk_ompi_intel/lib
+tempdir=/tmp
+homedir=/home/rporcel/subscripts/gamessuk/Si8O13
+stdout=0
+listing=TEST.out
+datain=1
+procspernode=1
+project=none
+RUNGAMESS_DIR=/aplic/gamess-uk_ompi_intel/rungamess
+PROG=rungamess
+queueargs=""
+queue=iqtc01.q
+debug=0
+jobworkdir=
+export jobname
+export root
+export executable
+export jobmode
+export flist
+export nprocs
+export nnodes
+export jobtime
+export scratchtopdir
+export libdir
+export tempdir
+export homedir
+export stdout
+export listing
+export datain
+export procs_per_node
+export project
+export RUNGAMESS_DIR
+export PROG
+export queueargs
+export queue
+export debug
+export jobworkdir
+#if test -f /home/g4stefan/.profile
+#then
+#. /home/g4stefan/.profile
+#fi
+if test ${GAMESS_LIB:=unset} = unset
+then
+GAMESS_LIB=/aplic/gamess-uk_ompi_intel/lib
+export GAMESS_LIB
+fi
+if test ${GAMESS_SCR:=unset} = unset
+then
+GAMESS_SCR=.
+export GAMESS_SCR
+fi
+if test ${GAMESS_WORK:=unset} = unset
+then
+GAMESS_WORK=
+export GAMESS_WORK
+fi
+if test ${GAMESS_TMP:=unset} = unset
+then
+GAMESS_TMP=/tmp
+export GAMESS_TMP
+fi
+if test ${GAMESS_PAREXE:=unset} = unset
+then
+GAMESS_PAREXE=/aplic/gamess-uk_ompi_intel/bin/gamess-uk
+export GAMESS_PAREXE
+fi
+if test ${GAMESS_EXE:=unset} = unset
+then
+GAMESS_EXE=/aplic/gamess-uk_ompi_intel/bin/gamess-uk
+export GAMESS_EXE
+fi
+$RUNGAMESS_DIR/rg_exe.$jobmode > /home/rporcel/subscripts/gamessuk/Si8O13/Si8O13.out

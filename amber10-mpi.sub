@@ -1,0 +1,43 @@
+#!/bin/bash 
+##########################################
+# Opcions i parametres de l'SGE
+########################################## 
+# (1) Nom del treball (per identificar) 
+#$ -N AMBER-10-prova01
+# (2) Recursos sol.licitats 
+#$ -l h_rt=0:50:0 
+#$ -l mem_free=4.0G 
+#$ -pe mpi 16
+# (3) Fitxers de sortida 
+#$ -cwd 
+#$ -o amber01.out 
+#$ -e amber01.err 
+#$ (4) Envia un mail quan acava el treball.
+#$ -m e 
+#$ -M jblasco@fbg.ub.es 
+##########################################
+# Entorn d.usuari 
+########################################## 
+# Es carreguen els moduls a utilitzar 
+. /etc/profile
+module load amber
+module load openmpi
+########################################## 
+# transferencia de dades 
+########################################## 
+# Es copien les dades al directori on es llenc,aran els calculs. 
+cd $TMPDIR
+export Project=amber_mpi_16
+export Input=$Project 
+cp -pr $HOME/path/amb/els/inputs/ $Input
+########################################## 
+# calcul 
+########################################## 
+# Es crea un directori de sortida pels resultats.
+export OMP_NUM_THREADS=1
+#mpirun -np $NSLOTS $pe_machines sander.MPI -O  -i in.md  -c crd.md.23  -o cytosine.out
+mpirun -np $NSLOTS sander_mpi -O  -i in.md  -c crd.md.23  -o cytosine.out
+########################################## 
+# Transferencia dels resultats
+########################################## 
+cp -pr $Input $HOME/path/a/on/guardar/els/outputs/

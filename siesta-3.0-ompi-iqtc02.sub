@@ -1,0 +1,49 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job 
+#$ -N test_siesta_iqtc02 
+# (2) Recursos sol.licitats 
+# Parallel Environment and number of cores
+#$ -pe ompi 4
+# Queue
+#$ -q iqtc02.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o siesta_iqtc02-4.out 
+#$ -e siesta_iqtc02-4.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu
+##########################################
+# User environment 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load siesta/3.0-rc2_paralel_ompi
+
+INPUT=SnO2FC.fdf
+OUTPUT=$INPUT.log
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+
+cp -r * $TMPDIR/
+cd $TMPDIR 
+#cp -r $HOME/bench/SIESTA/XRQTC.SIESTA_SnO2_FCfullBZ/input/* .
+########################################## 
+# Run the job 
+########################################## 
+export OMP_NUM_THREADS=1
+
+mpirun -np $NSLOTS siesta < $INPUT > $OUTPUT
+########################################## 
+# Copy the results to our home directory
+########################################## 
+mkdir -p $HOME/bench/SIESTA/XRQTC.SIESTA_SnO2_FCfullBZ/OUT_iqtc02
+cp -r $TMPDIR $HOME/bench/SIESTA/XRQTC.SIESTA_SnO2_FCfullBZ/OUT_iqtc02
+

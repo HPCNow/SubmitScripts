@@ -1,0 +1,65 @@
+#!/bin/bash 
+##########################################
+# SGE options and parameters
+########################################## 
+# (1) Name of the job 
+#$ -N XRQTC.VASP_ceria-surface-96
+# (2) Requested resources 
+# Parallel Environment and number of cores
+#$ -pe omp* 24
+# Queue
+#$ -q iqtc04.q
+# Shell
+#$ -S /bin/bash
+# (3) Output files 
+#$ -cwd 
+#$ -o vasp-XRQTC.VASP_ceria-surface-96.out 
+#$ -e vasp-XRQTC.VASP_ceria-surface-96.err 
+# (4) Remove the first '#' of the following 2 lines if you want to receive an email when the job ends.
+##$ -m e 
+##$ -M yourmail@ub.edu
+##########################################
+# User environment. 
+########################################## 
+# Load the modules needed 
+. /etc/profile.d/modules.sh
+module load VASP/5.2.12_ics-11.1.072_ompi-1.4.2
+########################################## 
+# Copying files needed 
+########################################## 
+# We copy the inputs to the directory where the jobs will run 
+#cd $TMPDIR 
+mkdir -p /work/jblasco/vasp-XRQTC.VASP_ceria-surface-96
+cd /work/jblasco/vasp-XRQTC.VASP_ceria-surface-96
+cp -r $HOME/bench/VASP/XRQTC.VASP_ceria-surface/input/* .
+########################################## 
+# Run the job 
+########################################## 
+export OMP_NUM_THREADS=1
+ulimit -l unlimited
+
+# -------------> WARNING <-------------------
+# Check what binary fits your needs
+# vasp             MPI parallel, charge density and wavefunction complex
+# vasp_cd          MPI parallel, charge density: half grid mode (-DNGZhalf)
+# vasp_gamma       MPI parallel, gamma-point only (-DwNGZhalf)
+# vasp_vtst        MPI parallel, charge density + wavefunction complex + VASP TST Tools
+# vasp_vtst_cd     MPI parallel, charge density: half grid mode (-DNGZhalf) + VASP TST Tools
+# vasp_vtst_gamma  MPI parallel, gamma-point only (-DwNGZhalf) + VASP TST Tools
+# -------------------------------------------
+
+mpirun -np $NSLOTS vasp_cd
+
+########################################## 
+# Copy the results to our home directory
+########################################## 
+mkdir -p $HOME/bench/VASP/XRQTC.VASP_ceria-surface/OUT/vasp
+#cp -r $TMPDIR $HOME/bench/VASP/XRQTC.VASP_ceria-surface/OUT/vasp/
+cp -r /work/jblasco/vasp-XRQTC.VASP_ceria-surface-96 $HOME/bench/VASP/XRQTC.VASP_ceria-surface/OUT/vasp/
+rm -fr /work/jblasco/vasp-XRQTC.VASP_ceria-surface-96
+##########################################
+# Temps dels resultats
+##########################################
+TEMPS=$(cat OUTCAR | grep "Total CPU time used" | awk '{print $(NF)}')
+echo "$NSLOTS   $TEMPS" >> $HOME/bench/VASP/XRQTC.VASP_ceria-surface/benchmark-Nehalem-DP-XRQTC.VASP_ceria-surface.dat
+

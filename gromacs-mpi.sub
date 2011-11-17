@@ -1,0 +1,42 @@
+#!/bin/bash 
+# Script per enviar càlculs de Gromacs
+# amb 16 processadors amb openmpi 
+# Recomenat enviar-ho a 2 nodes de 8 cores
+#                - Jordi Blasco 12/08/09 -
+##########################################
+# Opcions i parametres de l'SGE
+########################################## 
+# (1) Nom del treball (per identificar) 
+#$ -N GROMACS-OpenMPI-16
+# (2) Recursos sol.licitats 
+#$ -pe ompi 16
+# (3) Fitxers de sortida 
+#$ -cwd 
+#$ -o gromacs01.out 
+#$ -e gromacs01.err 
+# (4) Envia un mail quan acava el treball.
+#$ -m e 
+#$ -M jblasco@fbg.ub.es 
+##########################################
+# Entorn d.usuari 
+########################################## 
+# Es carreguen els moduls a utilitzar 
+. /etc/profile
+module load gromacs/4.0.5_ompi_fftw-3.2.1
+########################################## 
+# transferencia de dades 
+########################################## 
+# Es copien les dades al directori on es llenc,aran els calculs. 
+cd $TMPDIR
+cp -pr /$WORK/jblasco/d.dppc/* .
+########################################## 
+# calcul 
+########################################## 
+# Es crea un directori de sortida pels resultats.
+export OMP_NUM_THREADS=1
+grompp -v &> grompp.out
+mpirun -np $NSLOTS mdrun_mpi -v &> mdrun.out
+########################################## 
+# Transferencia dels resultats
+########################################## 
+cp -pr  mdrun.out /$WORK/jblasco/d.dppc/

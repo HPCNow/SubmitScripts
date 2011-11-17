@@ -1,0 +1,43 @@
+#!/bin/bash
+####################################################
+#	To use this script execute next instruccion
+#
+#	qsub orca_ompi_scratch.sub name_of_input (without extention)
+#
+#
+####################################################
+#$ -S /bin/bash
+#
+# name of job
+#$ -N orca_ompi		### job name 
+#$ -e orca_ompi.err	### sge error file
+#$ -o orca_ompi.out	### sge output file
+####
+####  Select the cluster where you want to run your job iqtc01.q, iqtc02.q & iqtc03.q  ####
+#$ -q iqtc01.q
+#$ -cwd
+#$ -m e
+####
+####  change this mail to recive an alert amil when the job finishes  ########
+#$ -M my@mail.com
+#
+#
+##### Emember that in iqtc01.q the maximum is 4 cores/node ans iqtc02.q & iqtc03.q is 8 cores/node
+#$ -pe ompi 4
+
+
+source /etc/profile
+. /etc/profile.d/modules.sh
+
+cwd=$PWD
+
+module load orca/ompi_r1730
+
+cp $1.inp $TMPDIR/
+cd $TMPDIR
+
+/aplic/orca/orca_amd64_exe_r1730/orca  $1.inp > $1.out
+
+mkdir -p $cwd/$1_out
+cp -r  * $cwd/$1_out/
+
