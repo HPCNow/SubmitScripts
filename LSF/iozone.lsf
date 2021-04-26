@@ -1,0 +1,12 @@
+#!/bin/bash
+#BSUB -J IOZone
+#BSUB -W 2:00
+#BSUB -n 1
+#BSUB -e %J.err
+#BSUB -o %J.out
+#BSUB -m "hostA hostD hostB"
+module load openmpi/4.0.2
+WORKDIR=$HOME/workdir/iozone
+mkdir -p $WORKDIR
+cd $WORKDIR
+~/iozone –Rac –g 16G > $WORKDIR/iozone.log

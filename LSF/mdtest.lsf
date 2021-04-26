@@ -1,0 +1,23 @@
+#!/bin/bash
+#BSUB -J MDTest
+#BSUB -W 2:00
+#BSUB -n 1
+#BSUB -e %J.err
+#BSUB -o %J.out
+#BSUB -m "hostA hostD hostB"
+module load openmpi/4.0.2
+
+# Options
+#
+# The value for the number of processes ${NUM_PROCS} depends on the number on clients to test and the number of processes per client to test.
+# The number of directories can be calculated as ${NUM_DIRS} = (parameter -b ^ parameter -z).
+# The total amount of files should always be higher than 1 000 000, so ${FILES_PER_DIR} is calculated as:
+
+NUM_DIRS=18
+NUM_PROCS=1
+FILES_PER_DIR=$((1000000 / ${NUM_DIRS} / ${NUM_PROCS}))
+WORKDIR=$HOME/workdir/mdtest
+mkdir -p $WORKDIR
+cd ~/mdtest
+# mpirun --map-by node -np 10 mdtest -C -T -r -F -d $HOME/workdir/mdtest -i 3 -I ${FILES_PER_DIR} -z 2 -b 8 -L -u
+./mdtest -d /tmp/ -b 18 -z 2 -i 1 -I ${FILES_PER_DIR} -d $WORKDIR
