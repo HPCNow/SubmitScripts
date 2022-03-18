@@ -1,0 +1,38 @@
+#!/bin/bash
+# GATK SubmitScript
+#################################################################
+#BSUB -J GATK_4_THREADS                         # Job_name
+#BSUB -W 08:00:00                               # Walltime
+#BSUB -M 16GB                                   # Memory requested (total)
+#BSUB -n 4                                      # Minimum number of processes
+#BSUB -cwd /home/easybuild/test/GATK/           # Path to current working directory
+#BSUB -q short                                  # Submit queue
+#BSUB -m ilk001                                 # List of nodes to be used
+#BSUB -o testGATK_%J.out                        # File with the output (in this example, it will only include the number of reads)
+#BSUB -e testGATK_%J.err                        # File with the error (in this example, it will include all the information about the run from GATK)
+
+
+#################################################################
+###  Load the Environment
+module load GATK/4.2.0.0-GCCcore-10.2.0-Java-11
+#################################################################
+# This bit needs to be tested in a LSF cluster
+#MEM=$(($LSB_MAX_THREADS_RUSAGE*$LSB_MAX_MEM_RUSAGE))
+#echo "Memory is:
+#total:$MEM Gb
+#mem per cpu:$LSB_MAX_MEM_RUSAGE Mb
+#num of cpus:$LSB_MAX_THREADS_RUSAGE"
+#################################################################
+###  Run the Parallel Program
+### More information about Multihreading capabilities for GATK4 here:
+### https://gatk.broadinstitute.org/hc/en-us/articles/360035890591-Spark
+#################################################################
+### Example data comes from the Genome In A Bottle project (https://www.nist.gov/programs-projects/genome-bottle), in this case a whole exome sequencing from a human sample, obtained with
+### wget ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/NA12878/Garvan_NA12878_HG001_HiSeq_Exome/project.NIST_NIST7035_H7AP8ADXX_TAAGGCGA_1_NA12878.bwa.markDuplicates.bam
+### wget ftp://ftp-trace.ncbi.nlm.nih.gov/ReferenceSamples/giab/data/NA12878/Garvan_NA12878_HG001_HiSeq_Exome/project.NIST_NIST7035_H7AP8ADXX_TAAGGCGA_1_NA12878.bwa.markDuplicates.bai
+srun gatk CountReadsSpark --java-options "-Xmx16G -XX:+UseParallelGC -XX:ParallelGCThreads=4"\
+ --spark-master local[4] -I ./project.NIST_NIST7035_H7AP8ADXX_TAAGGCGA_1_NA12878.bwa.markDuplicates.bam
+#################################################################
+### Write job information at the end of the task - needs to be tested in a LSF cluster
+#bhist -l $LSB_JOBID
+G
