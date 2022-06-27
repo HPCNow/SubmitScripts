@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH -J VTuneOpenMP
+#SBATCH -J VTuneSerial
 #SBATCH -A hpcnow
 #SBATCH --time=1:00:00
 #SBATCH --mem-per-cpu=4G
 #SBATCH -C ib
-#SBATCH --cpus-per-task=24
+#SBATCH --cpus-per-task=1
 ml 2021
 ml intel/2021a
 ml VTune/2021.6.0
